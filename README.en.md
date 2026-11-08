@@ -104,5 +104,18 @@ selectors in `course.py` / `player.py` / `inject.js`.
 - Use it on your own account in your own learning environment; whether the platform accepts
   automation and playback-rate changes is your call.
 
-MIT License.
+MIT License.@
+
+---
+
+## Disclaimer
+
+**This project is for personal technical study and research only. It is non-profit, and any commercial use (including paid "do-my-coursework" services) is prohibited.**
+
+- Login state, logs and screenshots stay on the user machine; the author collects no data
+- Automation may conflict with Ulearning's terms of service or your institution's rules — judge for yourself before using it
+- **Any direct or indirect consequence** of using this project (invalidated records, rejected grades, restricted accounts, disciplinary action, financial loss, etc.) **is borne entirely by the user, not the author**
+- Provided "AS IS", with no warranty of fitness or correctness
+
+Full text: [DISCLAIMER.md](DISCLAIMER.md). If your course forbids automation, do not use this project.
 
