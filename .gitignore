@@ -1,0 +1,25 @@
+# 运行时产物
+profile*/
+logs/
+shots/
+dist/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 敏感：登录态、导出的事件
+auth-cookies.json
+*.jsonl

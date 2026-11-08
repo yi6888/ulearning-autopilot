@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ulearning-autopilot"
+version = "1.0.0"
+description = "Automate Ulearning (优学院) courseware playback with Playwright: login once, then watch chapter by chapter."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "YG" }]
+keywords = ["ulearning", "playwright", "automation", "elearning"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Topic :: Education",
+]
+dependencies = ["playwright>=1.40"]
+
+[project.scripts]
+ulearning = "ulearning.cli:main"
+
+[tool.setuptools]
+packages = ["ulearning"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+ulearning = ["inject.js"]

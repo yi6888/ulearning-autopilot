@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>模拟优学院网课页（测试用）</title>
+<style>
+  body{margin:0;background:#0d1117;color:#c9d1d9;font:14px "Microsoft YaHei",system-ui;display:flex}
+  .left{flex:1;padding:18px}
+  .right{width:260px;border-left:1px solid #21262d;padding:14px}
+  video{background:#000;border-radius:8px;display:block}
+  .bar{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:6px 12px;cursor:pointer}
+  button:hover{background:#30363d}
+  .ch{padding:6px 8px;border-radius:6px;margin-bottom:6px;background:#161b22;cursor:pointer}
+  .ch.done{color:#3fb950}
+  #question{display:none;position:fixed;left:50%;top:22%;transform:translateX(-50%);width:420px;
+    background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;box-shadow:0 12px 40px #000a;z-index:9999}
+  #question h3{margin:0 0 12px;font-size:15px;color:#e6edf3}
+  #question label{display:block;padding:6px 0;cursor:pointer}
+  #question .row{margin-top:12px;display:flex;gap:8px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="left">
+  <video id="v" width="640" height="360"></video>
+
+  <div class="bar">
+    <button id="btn-play">播放/暂停</button>
+    <button id="btn-stuck">模拟卡死</button>
+    <button id="btn-quiz">弹出题目</button>
+    <button id="btn-seek">模拟拖动进度</button>
+    <span id="hint" style="color:#8b949e"></span>
+  </div>
+
+  <div id="question">
+    <h3>单选题：下列哪项属于本节课讲的内容？（课堂测试）</h3>
+    <label><input type="radio" name="q" value="A"> A. 完全无关的选项</label>
+    <label><input type="radio" name="q" value="B"> B. 本节课核心概念</label>
+    <label><input type="radio" name="q" value="C"> C. 另一个干扰项</label>
+    <label><input type="radio" name="q" value="D"> D. 以上都不是</label>
+    <div class="row"><button id="btn-submit">提交答案</button></div>
+  </div>
+</div>
+
+<div class="right">
+  <div style="color:#8b949e;font-size:12px;margin-bottom:8px">课程目录</div>
+  <div class="ch done" data-i="1">第1节 导论</div>
+  <div class="ch" data-i="2">第2节 核心概念</div>
+  <div class="ch" data-i="3">第3节 应用</div>
+  <button id="btn-next" style="width:100%;margin-top:10px">下一节</button>
+  <div id="cur" style="margin-top:14px;color:#58a6ff"></div>
+</div>
+
+<script>
+/* ---- 用 JS 垫片模拟一个 <video>，方便确定性测试各种状态 ---- */
+const v = document.getElementById('v');
+const S = { t: 0, dur: 120, paused: true, ended: false, rate: 1, frozen: false };
+const fire = n => v.dispatchEvent(new Event(n));
+Object.defineProperty(v, 'currentTime', { get: () => S.t, set: x => { S.t = x; fire('seeking'); } });
+Object.defineProperty(v, 'duration', { get: () => S.dur });
+Object.defineProperty(v, 'paused', { get: () => S.paused });
+Object.defineProperty(v, 'ended', { get: () => S.ended });
+Object.defineProperty(v, 'readyState', { get: () => 4 });
+Object.defineProperty(v, 'playbackRate', { get: () => S.rate, set: x => { S.rate = x; fire('ratechange'); } });
+Object.defineProperty(v, 'muted', { get: () => true, set: () => { } });
+v.play = () => { if (!S.paused) return Promise.resolve(); S.paused = false; S.ended = false; fire('play'); return Promise.resolve(); };
+v.pause = () => { if (S.paused) return; S.paused = true; fire('pause'); };
+v.load = () => { };
+
+let tickTimer = setInterval(() => {
+  if (!S.paused && !S.frozen) {
+    S.t = Math.min(S.dur, S.t + 0.25 * S.rate);
+    if (S.t >= S.dur) { S.paused = true; S.ended = true; fire('ended'); hint('已到结尾'); }
+    if (S.t > 20 && S.t < 20.3 && !window.__quizShown) { window.__quizShown = true; showQuiz(); }
+  }
+}, 250);
+
+function hint(t) { document.getElementById('hint').textContent = t; }
+function showQuiz() {
+  document.getElementById('question').style.display = 'block';
+  v.pause();
+  hint('弹题出现');
+}
+document.getElementById('btn-play').onclick = () => v.paused ? v.play() : v.pause();
+document.getElementById('btn-stuck').onclick = () => {
+  S.frozen = !S.frozen;
+  v.play();
+  hint(S.frozen ? '已冻结进度（模拟卡死）' : '已解冻');
+};
+document.getElementById('btn-quiz').onclick = showQuiz;
+document.getElementById('btn-seek').onclick = () => { v.currentTime = 5; hint('已跳到 5s'); };
+document.getElementById('btn-submit').onclick = () => {
+  document.getElementById('question').style.display = 'none';
+  v.play(); hint('已提交，继续播放');
+};
+let cur = 1;
+document.getElementById('btn-next').onclick = () => {
+  if (cur >= 3) { hint('已是最后一节'); return; }
+  cur++;
+  document.querySelectorAll('.ch').forEach(e => e.classList.toggle('done', +e.dataset.i <= cur));
+  document.getElementById('cur').textContent = '正在学习第 ' + cur + ' 节';
+  S.t = 0; S.dur = 120; S.ended = false; S.frozen = false; window.__quizShown = false;
+  v.play();
+  history.pushState({}, '', '?chapter=' + cur);
+};
+document.getElementById('cur').textContent = '正在学习第 1 节';
+/* ?auto=1 时自动开播，方便直接喂给 ulearning_watch.py 做端到端验证 */
+if (location.search.includes('auto=1')) setTimeout(() => v.play(), 300);
+</script>
+</body>
+</html>
