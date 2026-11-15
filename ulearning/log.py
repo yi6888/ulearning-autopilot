@@ -41,6 +41,13 @@ class Log:
     def err(self, *p): self(*p, level="err")
     def dim(self, *p): self(*p, level="dim")
 
+    def set_logdir(self, logdir: Path | None) -> None:
+        """运行时指定日志目录；未调用前 event() 只计数、不落盘。"""
+        if not logdir:
+            return
+        logdir.mkdir(parents=True, exist_ok=True)
+        self.file = logdir / f"events-{datetime.now():%Y%m%d}.jsonl"
+
     def event(self, typ: str, msg: str, extra: dict | None = None):
         self.counts[typ] = self.counts.get(typ, 0) + 1
         if self.file:

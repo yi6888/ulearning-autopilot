@@ -1,4 +1,4 @@
-﻿"""学习页（ua.ulearning.cn/learnCourse）层：小节列表、点开、**看完到 100%** 再走。
+"""学习页（ua.ulearning.cn/learnCourse）层：小节列表、点开、**看完到 100%** 再走。
 
 站点结构（实测，改版用 tools/probe.py 重新抓）：
 

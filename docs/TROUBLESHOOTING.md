@@ -52,20 +52,20 @@ python tools/probe.py --course <courseId>
 
 ## 4. 视频播完不切下一个小节
 
-`player.LEARN_UNITS_JS` 的编号正则：
+小节目录由 `player.LIST_PAGES_JS` 读取 `.page-item` → `.page-name` / `.text span` 的文本，
+“是否为视频”由 `player.SKIP_RE` 过滤（小测/测验/作业/讨论/答疑/考试）。如果课程改成
+`第一部分`、`（一）`、`Chapter 1` 这类编号，或新增了非视频节点文案，改这两处：
 
-```js
-/^(\d+[-.．]\d+|\d+)[.．]/
-```
+- 文本取不到 → `player.LIST_PAGES_JS` 里 `span` / `.text` 的选择器
+- 非视频节点没被跳过 → `player.SKIP_RE` 加关键词
 
-覆盖 `1-1.`、`1-2.`、`4.` 三种。如果课程改成 `第一部分`、`（一）`、`Chapter 1`，正则要跟着改。
-排查方法：`python tools/probe.py --course <id>` 打出来的 `learn-items.json` 就是匹配结果，
-数量对不上就是正则的问题。
+排查方法：`python tools/probe.py --course <id>` 打出来的 `logs/learn-items.json` 就是读取结果，
+`name` 为空或数量对不上，就是选择器的问题。
 
 ## 5. 反复重载 / 疯狂重试
 
 - `STUCK` 阈值默认 20s（kernel `stuckSec`），大文件起播慢可以调到 40
-- `player.watch()` 里 `max_retry` 默认 3，重载 2 次还不动就放弃本节
+- `player._play_loop()` 里卡住后重试唤醒 3 次仍不动就放弃本节（返回 `stuck`）
 - 如果日志里 `STUCK` 每 20 秒一条且 `at` 值不变，说明是真卡：检查网络或该视频的 m3u8 是否 403
 
 ## 6. 窗口疯狂弹出

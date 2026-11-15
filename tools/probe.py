@@ -24,7 +24,7 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 from ulearning import browser as B  # noqa: E402
 from ulearning import course as C  # noqa: E402
 from ulearning.log import LOG  # noqa: E402
-from ulearning.player import list_units  # noqa: E402
+from ulearning.player import list_pages  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 LOGS, SHOTS = ROOT / "logs", ROOT / "shots"
@@ -67,15 +67,15 @@ def main():
             return 2
         lp.wait_for_timeout(6000)
 
-        units = list_units(lp)
+        units = list_pages(lp)
         (LOGS / "learn-items.json").write_text(json.dumps(units, ensure_ascii=False, indent=1), encoding="utf-8")
         LOG.ok(f"小节 {len(units)} 个")
         for u in units:
-            print(f"  [{u['i']}] {u['text']}")
+            print(f"  [{u['i']}] {u['name']}")
 
         if units:
             view = lp.evaluate("""() => {
-                const a = window.__LU__ || [];
+                const a = window.__PAGES__ || [];
                 const el = a[%d];
                 if (el) { el.scrollIntoView({block:'center'}); el.click(); }
                 return true;

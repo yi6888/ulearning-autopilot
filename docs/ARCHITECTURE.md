@@ -58,27 +58,29 @@ ua.ulearning.cn/learnCourse/learnCourse.html?courseId=&chapterId=&classId=
 右栏：<video src="https://obscloud.ulearning.cn/resources/...m3u8?token=...">
 ```
 
-完成判定用 `currentTime >= duration - 1.5`。站点自己的规则是"观看时长≥视频时长"，
-所以不要 Seek——本项目从不改 `currentTime`（唯一例外是卡住重载后回跳，见 `player.watch`）。
+完成判定以服务端的 `.page-name.complete` / `i.finish` 为准；本地 `t ≥ dur - 0.2` 只用于判断“播到了结尾”。
+站点自己的规则是"观看时长≥视频时长"，所以不要 Seek——本项目从不改 `currentTime`（`inject.js` 只在 `ended` 瞬间 `pause()`，
+靠平台按累计时长记账）。
 
 ## 状态机
 
 ```
-             ┌────────────── 每周目 ──────────────┐
-textbook ──▶ open_chapter ──▶ learnPage ──▶ play_unit ──▶ watch
+             ┌────────────── 每个专题 ──────────────┐
+textbook ──▶ open_chapter ──▶ learnPage ──▶ play_to_end（逐小节）
    ▲                                                    │
-   │◀───────────── 小节播完 / 失败 ───────────────────────┘
+   │◀─────────── 小节播完 / 失败 / 专题结束 ────────────────┘
    │
    └── 下一个专题
 ```
 
-`watch()` 返回四种结局，决定上层动作：
+`play_to_end()` 返回的结局，决定上层动作：
 
 | 结局 | 触发 | 上层动作 |
 |---|---|---|
-| `done` | `t ≥ dur - 1.5` | 下一个小节 |
-| `stuck` | 在播但进度不动，重载 2 次仍不动 | 放弃本节，进下一节 |
-| `stuck_paused` | 反复暂停，连续 3 次唤醒失败 | 放弃本节 |
+| `end` | `ended` 钩子触发，或 `t ≥ dur - 0.2` | 等「已看完」标签 → 点下一节 → 回读红勾 |
+| `stuck` | 在播但进度不动，重试 3 次唤醒失败 | 记入 `failed`，继续下一节 |
+| `no_video` | 该页没有可见视频（PPT/文档等） | 记入 `failed`，继续下一节 |
+| `miss` | 小节点不开 | 记入 `failed`，继续下一节 |
 | `closed` | 学习页被关 | 终止整轮 |
 
 ## 为什么这样设计

@@ -1,0 +1,4 @@
+# 统一换行，避免 Windows/Linux CI 之间的 CRLF/LF 混战
+* text=auto eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf

@@ -34,6 +34,34 @@ jobs:
         run: |
           python -m ulearning --version
           python -m ulearning run --help
+          python tools/probe.py --help
+
+      - name: Import smoke (catch stale symbols)
+        run: |
+          python - <<'PY'
+          import importlib, importlib.util, pathlib, sys
+          root = pathlib.Path(".")
+          fails = []
+          for name in ["ulearning.browser", "ulearning.cli", "ulearning.course",
+                       "ulearning.dom", "ulearning.log", "ulearning.player", "ulearning.runner"]:
+              try:
+                  importlib.import_module(name)
+              except Exception as e:
+                  fails.append((name, repr(e)))
+          for f in sorted(root.glob("tools/*.py")):
+              try:
+                  spec = importlib.util.spec_from_file_location("smoke_" + f.stem, f)
+                  mod = importlib.util.module_from_spec(spec)
+                  spec.loader.exec_module(mod)
+              except Exception as e:
+                  fails.append((str(f), repr(e)))
+          if fails:
+              print("IMPORT FAILURES:")
+              for f, e in fails:
+                  print(" ", f, e)
+              sys.exit(1)
+          print("import smoke ok")
+          PY
 
       - name: Detector self-test (bundled chromium)
         env:

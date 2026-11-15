@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """抓学习页的进度上报接口：搞清“完成”到底由什么字段决定。
 

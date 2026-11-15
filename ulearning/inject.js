@@ -1,4 +1,4 @@
-﻿/* 注入到页面上下文的检测内核（Playwright 版）
+/* 注入到页面上下文的检测内核（Playwright 版）
  * 与 userscript 同源逻辑，去掉 HUD 与 GM API，事件通过 window.__report 回传 Python。
  */
 (function () {
@@ -42,12 +42,6 @@
     return document.querySelector('video');
   }
 
-  function visible(n) {
-    if (!n || !n.getBoundingClientRect) return false;
-    const r = n.getBoundingClientRect(), cs = getComputedStyle(n);
-    return r.width > 60 && r.height > 30 && cs.display !== 'none' && cs.visibility !== 'hidden' && +cs.opacity > 0.1;
-  }
-
   function bind() {
     const v = findVideo();
     if (!v || v === state.video) return;
@@ -78,7 +72,7 @@
     for (const s of QUIZ_SEL) {
       let ns; try { ns = document.querySelectorAll(s); } catch (e) { continue; }
       for (const n of ns) {
-        if (!visible(n)) continue;
+        if (!visible(n, 60, 30, 0.1)) continue;
         const t = (n.innerText || '').slice(0, 500);
         if (t.length < 4) continue;
         if (QUIZ_RE.test(t) || n.querySelector('input[type=radio],input[type=checkbox]')) { hit = { el: n, txt: t }; break outer; }
@@ -99,7 +93,7 @@
   function next() {
     if (!CFG.autoNext || Date.now() - lastNext < 15000) return;
     const c = [...document.querySelectorAll('a,button,li,div,span')].filter(n => {
-      if (!visible(n)) return false;
+      if (!visible(n, 60, 30, 0.1)) return false;
       const t = (n.innerText || n.title || '').trim();
       return t.length <= 12 && /下一节|下一课|下一章|继续学习|下一页|下一个/.test(t) && !n.disabled;
     });
@@ -114,10 +108,11 @@
      视频还在放但学时不再累计，必须点「继续学习」。 ---- */
   let tickCount = 0;
 
-  function visible(n) {
+  function visible(n, minW, minH, minOp) {
+    if (!n || !n.getBoundingClientRect) return false;
     const r = n.getBoundingClientRect(), c = getComputedStyle(n);
-    return r.width > 10 && r.height > 8 && c.display !== 'none'
-           && c.visibility !== 'hidden' && +c.opacity > 0.05;
+    return r.width > (minW || 10) && r.height > (minH || 8) && c.display !== 'none'
+           && c.visibility !== 'hidden' && +c.opacity > (minOp || 0.05);
   }
 
   function guardIdle() {

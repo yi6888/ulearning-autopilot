@@ -1,4 +1,4 @@
-﻿# ulearning-autopilot
+# ulearning-autopilot
 
 优学院（ulearning.cn）网课自动驾驶：**登录一次，之后按专题自动看完课件**。
 
@@ -60,7 +60,7 @@ python -m ulearning run -c "形势与政策（三）"
 # 按序号（课程列表第 1 门是 0）
 python -m ulearning run --course-idx 2
 
-# 只刷前 2 个专题，倍速 2.0，无头
+# 只刷前 2 个专题，无头（倍速必须 1.0，否则平台按实际时长判不足）
 python -m ulearning run -c 形势与政策 --max-chapters 2 --headless
 
 # 换 Chrome
@@ -87,6 +87,7 @@ python -m ulearning list -c 形势与政策
 | `--headless` | 关 | 无头运行（登录态需已保存） |
 | `--profile` | profile-auto | 配置目录 |
 | `--cookie-days` | 30 | 登录态保留天数 |
+| `--webhook` | 空 | 事件实时转发地址（可选，配合 `tools/hook_server.py`） |
 
 ---
 
@@ -173,8 +174,9 @@ python tools/hook_server.py --port 8765
 # 浏览器打开 http://127.0.0.1:8765/
 ```
 
-`run` 时加 `--webhook http://127.0.0.1:8765/hook` 可把事件实时推到面板。当前版本 webhook 由
-`inject.js` 的 `CFG.webhook` 控制，可通过 `window.__ULEARN_CFG` 注入。
+`run` 时加 `--webhook http://127.0.0.1:8765/hook` 可把事件实时推到面板。转发由 Python 侧
+`Session.on_report` 完成（非阻塞），面板端是 `tools/hook_server.py`。事件同时落盘到
+`logs/events-YYYYMMDD.jsonl`。
 
 ---
 
@@ -198,7 +200,7 @@ ulearning/inject.js   弹题识别、下一节按钮文案
 - 上传仓库前别把 `profile-auto/` 或 `logs/*.jsonl` 一起提交——里面有你的账号 cookie。
 - 仅用于自己账号的学习环境；倍速与自动化行为是否被平台接受，由使用者自行判断。
 
-MIT License.@
+MIT License.
 
 ---
 

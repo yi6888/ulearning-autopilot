@@ -1,4 +1,4 @@
-﻿# ulearning-autopilot
+# ulearning-autopilot
 
 Playwright driver for [Ulearning (优学院)](https://www.ulearning.cn) that **logs in once, then watches
 the courseware for you** — chapter by chapter, section by section.
@@ -40,7 +40,7 @@ Only `playwright` is required. It drives the Edge/Chrome already installed on th
 ```bash
 python -m ulearning login                                # one-time
 python -m ulearning list  -c 形势与政策                    # list courses only
-python -m ulearning run   -c 形势与政策（三） --speed 1.5
+python -m ulearning run   -c 形势与政策（三） --speed 1.0
 python -m ulearning run   --course-idx 2 --max-chapters 2
 python -m ulearning run   -c 形势与政策 -b chrome --headless
 ```
@@ -54,6 +54,7 @@ python -m ulearning run   -c 形势与政策 -b chrome --headless
 | `--max-chapters` | 0 | stop after N chapters (0 = all) |
 | `--headless` | off | requires a saved login |
 | `--cookie-days` | 30 | login lifetime |
+| `--webhook` | — | optional event forward target, e.g. `http://127.0.0.1:8765/hook` (see `tools/hook_server.py`) |
 
 ## How it works
 
@@ -67,7 +68,7 @@ courseList ──click by title──▶ course page ──courseId──▶ #/c
                                           left tree 1-1 / 1-2 / …
                                           right side <video src="*.m3u8">
                                                                   ▼
-                                        dismiss tips → play → t ≥ dur-1.5 → next section
+                                        dismiss tips → play → t ≥ dur-0.2 → next section
 ```
 
 - `ulearning/inject.js` runs inside the page and reports `STUCK` / `PAUSE` / `QUIZ` / `NEAR_END` / `NEXT`
@@ -104,7 +105,7 @@ selectors in `course.py` / `player.py` / `inject.js`.
 - Use it on your own account in your own learning environment; whether the platform accepts
   automation and playback-rate changes is your call.
 
-MIT License.@
+MIT License.
 
 ---
 

@@ -1,4 +1,4 @@
-﻿"""命令行入口：python -m ulearning <command>"""
+"""命令行入口：python -m ulearning <command>"""
 from __future__ import annotations
 
 import argparse
@@ -30,6 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--course-name", "-c", default="", help="课程名关键词，如 形势与政策（三）")
     p_run.add_argument("--course-idx", type=int, default=0, help="没给名字时按序号选，从 0 开始")
     p_run.add_argument("--max-chapters", type=int, default=0, help="只刷前 N 个专题，0=全部")
+    p_run.add_argument("--webhook", default="", help="事件实时转发地址，如 http://127.0.0.1:8765/hook")
     common(p_run)
 
     p_list = sub.add_parser("list", help="只登录并列出课程，不播放")
@@ -58,6 +59,8 @@ def main(argv: list[str] | None = None) -> int:
         opts.course_idx = args.course_idx
     if getattr(args, "max_chapters", 0):
         opts.max_chapters = args.max_chapters
+    if getattr(args, "webhook", ""):
+        opts.webhook = args.webhook
 
     if args.quiet:
         LOG.quiet = True

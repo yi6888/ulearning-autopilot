@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """webhook 接收端 + 实时看板（标准库实现，不用装框架）
 

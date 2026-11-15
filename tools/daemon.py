@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """常驻控制器：浏览器只开一次，之后靠文件下指令，不关窗口。
 
